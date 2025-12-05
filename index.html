@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>TikTok Downloader — UI</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --muted:#9aa4b2; --accent:#06b6d4; --glass: rgba(255,255,255,0.03);
+      --radius:14px; --shadow: 0 8px 30px rgba(2,6,23,0.6);
+    }
+    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;color:#e6eef6;background:linear-gradient(180deg,#071024 0%, #08142b 100%);}
+    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:40px}
+    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:var(--radius);box-shadow:var(--shadow);padding:28px;border:1px solid rgba(255,255,255,0.03);}
+    header{display:flex;gap:16px;align-items:center}
+    .logo{width:56px;height:56px;background:linear-gradient(135deg,var(--accent),#7c3aed);border-radius:12px;display:flex;align-items:center;justify-content:center;font-weight:700;color:#021025}
+    h1{margin:0;font-size:20px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .controls{display:grid;grid-template-columns:1fr 260px;gap:16px;margin-bottom:18px}
+    input[type=url]{width:100%;padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:var(--glass);color:inherit;font-size:15px}
+    select, .btn{width:100%;padding:12px;border-radius:10px;border:none;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--accent),#8b5cf6);color:#021025;cursor:pointer}
+    .opts{display:flex;gap:8px;align-items:center}
+    label.switch{display:inline-flex;align-items:center;gap:8px;cursor:pointer}
+    label.switch input{display:none}
+    .toggle{width:44px;height:26px;background:#0b2533;border-radius:999px;position:relative}
+    .toggle::after{content:"";position:absolute;left:4px;top:4px;width:18px;height:18px;border-radius:50%;background:#fff;transition:all .18s}
+    label.switch input:checked + .toggle{background:linear-gradient(90deg,var(--accent),#7c3aed)}
+    label.switch input:checked + .toggle::after{transform:translateX(18px)}
+    .info{font-size:13px;color:var(--muted);margin-top:10px}
+    .preview{margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
+    video{width:100%;border-radius:10px;background:#000}
+    .meta{display:flex;gap:12px;align-items:center;margin-top:10px}
+    .meta .badge{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:13px}
+    .footer{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:18px;color:var(--muted);font-size:13px}
+    .small{font-size:12px;color:var(--muted)}
+    @media (max-width:780px){.controls{grid-template-columns:1fr;}.logo{width:48px;height:48px}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card" role="main">
+      <header>
+        <div class="logo">TD</div>
+        <div>
+          <h1>TikTok Downloader — Gratis (UI)</h1>
+          <p class="lead">Tempelkan link video TikTok, pilih opsi lalu tekan <strong>Ambil</strong>. (Ini hanya antarmuka — butuh backend untuk fungsi nyata)</p>
+        </div>
+      </header>
+
+      <form id="dlForm" class="controls" onsubmit="return false;">
+        <div>
+          <input id="urlInput" type="url" placeholder="Masukkan URL TikTok (mis. https://www.tiktok.com/...)" required>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <label style="flex:1">
+              <select id="qualitySelect">
+                <option value="best">Kualitas: Terbaik</option>
+                <option value="medium">Sedang</option>
+                <option value="low">Rendah</option>
+              </select>
+            </label>
+            <label style="width:120px">
+              <select id="formatSelect">
+                <option value="video">Video (MP4)</option>
+                <option value="audio">Audio (MP3)</option>
+              </select>
+            </label>
+          </div>
+          <div class="info">Catatan: antarmuka ini tidak mengunduh sendiri — hubungkan ke endpoint <code>/api/download?url=...</code></div>
+        </div>
+
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <button id="fetchBtn" class="btn btn-primary">Ambil</button>
+          <label class="switch small"><input id="noWatermark" type="checkbox"><span class="toggle"></span> <span class="small">Tanpa watermark</span></label>
+          <button id="clearBtn" type="button" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);">Bersihkan</button>
+        </div>
+      </form>
+
+      <div id="resultArea" class="preview" hidden>
+        <div id="previewContainer">
+          <!-- Preview will be injected here -->
+        </div>
+
+        <div class="meta">
+          <div class="badge" id="metaTitle">Judul: -</div>
+          <div class="badge" id="metaAuthor">Pengguna: -</div>
+          <div class="badge" id="metaDuration">Durasi: -</div>
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
+          <a id="downloadLink" class="btn btn-primary" href="#">Download</a>
+          <button id="copyBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);">Salin Link</button>
+          <div id="status" class="small">Status: Siap</div>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>⚖️ Pastikan Anda punya hak untuk mengunduh/menyimpan konten — gunakan untuk konten yang diizinkan.</div>
+        <div>v1 • UI saja</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple UI behaviour + mocked fetch flow.
+    const urlInput = document.getElementById('urlInput');
+    const fetchBtn = document.getElementById('fetchBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const resultArea = document.getElementById('resultArea');
+    const previewContainer = document.getElementById('previewContainer');
+    const downloadLink = document.getElementById('downloadLink');
+    const status = document.getElementById('status');
+    const metaTitle = document.getElementById('metaTitle');
+    const metaAuthor = document.getElementById('metaAuthor');
+    const metaDuration = document.getElementById('metaDuration');
+    const copyBtn = document.getElementById('copyBtn');
+
+    function isProbablyTikTok(url){
+      try{ const u = new URL(url); return /tiktok.com/.test(u.hostname) || /vm.tiktok.com/.test(u.hostname);}catch(e){return false}
+    }
+
+    fetchBtn.addEventListener('click', async ()=>{
+      const url = urlInput.value.trim();
+      if(!url){alert('Masukkan URL dulu.'); return}
+      if(!isProbablyTikTok(url)){ if(!confirm('URL tidak terlihat seperti tiktok.com — lanjutkan?')) return }
+
+      // UI feedback
+      status.textContent = 'Mengambil metadata...';
+      fetchBtn.disabled = true;
+      resultArea.hidden = true;
+
+      // NOTE: replace this mocked block with a real fetch to your backend endpoint
+      try{
+        // Mock delay to simulate network
+        await new Promise(r => setTimeout(r, 900));
+
+        // Mocked response (backend should return JSON with real fields)
+        const mock = {
+          title: 'Contoh Video TikTok',
+          author: '@contoh_user',
+          duration: '00:15',
+          thumbnail: '',
+          downloadUrl: '/api/download?url=' + encodeURIComponent(url)
+        }
+
+        // populate UI
+        previewContainer.innerHTML = '';
+        const v = document.createElement('video');
+        v.controls = true; v.src = mock.downloadUrl; v.poster = mock.thumbnail; v.preload = 'metadata';
+        previewContainer.appendChild(v);
+
+        metaTitle.textContent = 'Judul: ' + mock.title;
+        metaAuthor.textContent = 'Pengguna: ' + mock.author;
+        metaDuration.textContent = 'Durasi: ' + mock.duration;
+        downloadLink.href = mock.downloadUrl;
+        downloadLink.setAttribute('download', 'tiktok_video.mp4');
+
+        resultArea.hidden = false;
+        status.textContent = 'Selesai — siap unduh.';
+
+      }catch(err){
+        console.error(err);
+        alert('Gagal mengambil data. Cek konsol.');
+        status.textContent = 'Error';
+      }finally{
+        fetchBtn.disabled = false;
+      }
+    });
+
+    clearBtn.addEventListener('click', ()=>{
+      urlInput.value = '';
+      resultArea.hidden = true;
+      status.textContent = 'Siap';
+    });
+
+    copyBtn.addEventListener('click', ()=>{
+      if(!downloadLink.href){alert('Belum ada link');return}
+      navigator.clipboard.writeText(downloadLink.href).then(()=>{
+        status.textContent = 'Link disalin ke clipboard.';
+      }).catch(()=>status.textContent = 'Gagal menyalin.');
+    });
+
+    // accessibility: allow Enter to trigger
+    urlInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ fetchBtn.click(); e.preventDefault(); } });
+  </script>
+</body>
+</html>
