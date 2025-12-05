@@ -1,192 +1,174 @@
-<!doctype html>
-
+<!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>TikTok Downloader — UI</title>
-  <meta name="description" content="Antarmuka sederhana untuk mengunduh video TikTok menggunakan backend Anda." />
-  <style>
-    :root{--bg:#0b1220;--card:#0f1724;--muted:#98a0aa;--accent:#06b6d4}
-    html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#071024 0%,#08142b 100%);color:#e6eef6}
-    .wrap{min-height:100%;display:flex;align-items:center;justify-content:center;padding:28px}
-    .card{width:100%;max-width:920px;background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:16px;padding:24px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 8px 30px rgba(2,6,23,0.6)}
-    header{display:flex;gap:14px;align-items:center}
-    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#7c3aed);display:flex;align-items:center;justify-content:center;font-weight:700;color:#021025}
-    h1{margin:0;font-size:20px}
-    p.lead{color:var(--muted);margin:6px 0 16px}
-    .controls{display:grid;grid-template-columns:1fr 260px;gap:14px}
-    input[type=url],select{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(255,255,255,0.04);background:rgba(255,255,255,0.02);color:inherit}
-    .btn{padding:12px;border-radius:10px;border:none;font-weight:600;cursor:pointer}
-    .btn-primary{background:linear-gradient(90deg,var(--accent),#8b5cf6);color:#021025}
-    .muted{color:var(--muted);font-size:13px}
-    .preview{margin-top:18px;background:linear-gradient(180deg, rgba(255,255,255,0.01), rgba(255,255,255,0.02));padding:14px;border-radius:12px;border:1px solid rgba(255,255,255,0.02)}
-    video{width:100%;border-radius:10px;background:#000}
-    .meta{display:flex;gap:10px;align-items:center;margin-top:10px;flex-wrap:wrap}
-    .badge{padding:6px 10px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:13px}
-    .footer{display:flex;justify-content:space-between;align-items:center;margin-top:18px;color:var(--muted);font-size:13px}
-    @media (max-width:780px){.controls{grid-template-columns:1fr}.logo{width:48px;height:48px}}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TikTok Downloader</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .tiktok-gradient {
+            background: linear-gradient(90deg, #00f2ea, #ff0050);
+        }
+        .glass-effect {
+            background: rgba(31, 41, 55, 0.7);
+            backdrop-filter: blur(10px);
+        }
+    </style>
 </head>
-<body>
-  <div class="wrap">
-    <div class="card" role="main">
-      <header>
-        <div class="logo">TD</div>
-        <div>
-          <h1>TikTok Downloader — Gratis</h1>
-          <p class="lead">Tempelkan link TikTok, pilih opsi lalu tekan <strong>Ambil</strong>. Antarmuka ini terhubung ke backend yang kamu sediakan.</p>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4 relative overflow-hidden">
+
+    <div class="absolute top-0 left-0 w-64 h-64 bg-cyan-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 -translate-x-1/2 -translate-y-1/2"></div>
+    <div class="absolute bottom-0 right-0 w-64 h-64 bg-pink-500 rounded-full mix-blend-multiply filter blur-3xl opacity-20 translate-x-1/2 translate-y-1/2"></div>
+
+    <div class="w-full max-w-md glass-effect border border-gray-700 rounded-2xl shadow-2xl relative z-10">
+        
+        <div class="p-8 text-center">
+            <h1 class="text-3xl font-bold mb-2 tracking-tight">
+                <i class="fab fa-tiktok text-white mr-2"></i>Downloader
+            </h1>
+            <p class="text-gray-400 text-sm">Download Video Tanpa Watermark & Audio</p>
         </div>
-      </header>
 
-```
-  <form id="dlForm" class="controls" onsubmit="return false;">
-    <div>
-      <input id="urlInput" type="url" placeholder="Masukkan URL TikTok (mis. https://www.tiktok.com/...)" required>
+        <div class="px-8 pb-8 space-y-4">
+            <div class="relative group">
+                <input type="text" id="urlInput" 
+                    class="w-full bg-gray-800 border border-gray-600 text-white rounded-xl py-4 pl-4 pr-12 focus:outline-none focus:border-pink-500 focus:ring-1 focus:ring-pink-500 transition shadow-lg" 
+                    placeholder="Tempel link TikTok di sini...">
+                <button onclick="pasteClipboard()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white transition">
+                    <i class="fas fa-paste"></i>
+                </button>
+            </div>
 
-      <div style="display:flex;gap:8px;margin-top:10px">
-        <select id="formatSelect">
-          <option value="video">Video (MP4)</option>
-          <option value="audio">Audio (MP3)</option>
-        </select>
-        <select id="qualitySelect">
-          <option value="best">Kualitas: Terbaik</option>
-          <option value="medium">Sedang</option>
-          <option value="low">Rendah</option>
-        </select>
-      </div>
+            <button onclick="fetchVideoInfo()" id="processBtn" 
+                class="w-full tiktok-gradient hover:opacity-90 text-white font-bold py-4 rounded-xl shadow-lg transform transition active:scale-95 flex items-center justify-center gap-2">
+                <span>Proses Video</span>
+                <i class="fas fa-search"></i>
+            </button>
+        </div>
 
-      <div class="muted" style="margin-top:10px">Catatan: backend akan dihubungi di <code id="backendUrl"></code></div>
+        <div id="loading" class="hidden px-8 pb-8 text-center">
+            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-gray-600 border-t-cyan-400"></div>
+            <p class="text-gray-400 mt-3 text-sm animate-pulse">Sedang mencari video...</p>
+        </div>
+
+        <div id="resultCard" class="hidden border-t border-gray-700 bg-gray-800/50">
+            <div class="p-6">
+                <div class="flex gap-4 mb-6">
+                    <img id="thumb" src="" class="w-24 h-32 object-cover rounded-lg shadow-md bg-gray-700 flex-shrink-0">
+                    
+                    <div class="flex flex-col justify-center overflow-hidden">
+                        <h3 id="author" class="font-bold text-cyan-400 text-lg truncate">@username</h3>
+                        <p id="desc" class="text-gray-300 text-xs line-clamp-3 mt-1 leading-relaxed">Deskripsi video...</p>
+                        <div class="flex gap-4 mt-3 text-xs text-gray-500">
+                            <span id="stats_likes"><i class="fas fa-heart mr-1"></i> -</span>
+                            <span id="stats_plays"><i class="fas fa-play mr-1"></i> -</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <a id="btnNoWm" href="#" target="_blank" 
+                       class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white py-3 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition hover:border-cyan-400">
+                        <i class="fas fa-video text-cyan-400"></i> No Watermark
+                    </a>
+                    
+                    <a id="btnAudio" href="#" target="_blank" 
+                       class="bg-gray-700 hover:bg-gray-600 border border-gray-600 text-white py-3 px-4 rounded-lg text-sm font-medium flex items-center justify-center gap-2 transition hover:border-pink-500">
+                        <i class="fas fa-music text-pink-500"></i> Audio MP3
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorMsg" class="hidden p-4 bg-red-500/10 border-t border-red-500/20 text-red-200 text-sm text-center">
+            <i class="fas fa-exclamation-circle mr-1"></i> <span id="errorText">Gagal memproses link.</span>
+        </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:8px">
-      <button id="fetchBtn" class="btn btn-primary">Ambil</button>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px"><input id="noWm" type="checkbox"> Tanpa watermark</label>
-      <button id="clearBtn" type="button" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);">Bersihkan</button>
-    </div>
-  </form>
+    <script>
+        const API_BASE = "https://mesin-website-rizal-ke-2.onrender.com"; // URL Backend
 
-  <div id="resultArea" class="preview" hidden>
-    <div id="previewContainer"></div>
-
-    <div class="meta">
-      <div class="badge" id="metaTitle">Judul: -</div>
-      <div class="badge" id="metaAuthor">Pengguna: -</div>
-      <div class="badge" id="metaDuration">Durasi: -</div>
-    </div>
-
-    <div style="display:flex;gap:8px;margin-top:12px;align-items:center">
-      <a id="downloadLink" class="btn btn-primary" href="#">Download</a>
-      <button id="copyBtn" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.04);">Salin Link</button>
-      <div id="status" class="muted">Status: Siap</div>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div>⚖️ Pastikan Anda punya hak untuk mengunduh/menyimpan konten — gunakan hanya untuk konten yang diizinkan.</div>
-    <div class="muted">v1 • UI terhubung ke backend</div>
-  </div>
-</div>
-```
-
-  </div>
-
-  <script>
-    // === CONFIG: ganti baseBackend jika perlu ===
-    const baseBackend = 'https://mesin-website-rizal-ke-2.onrender.com';
-    document.getElementById('backendUrl').textContent = baseBackend + '/api/*';
-
-    // Elements
-    const urlInput = document.getElementById('urlInput');
-    const fetchBtn = document.getElementById('fetchBtn');
-    const clearBtn = document.getElementById('clearBtn');
-    const resultArea = document.getElementById('resultArea');
-    const previewContainer = document.getElementById('previewContainer');
-    const downloadLink = document.getElementById('downloadLink');
-    const status = document.getElementById('status');
-    const metaTitle = document.getElementById('metaTitle');
-    const metaAuthor = document.getElementById('metaAuthor');
-    const metaDuration = document.getElementById('metaDuration');
-    const copyBtn = document.getElementById('copyBtn');
-    const noWm = document.getElementById('noWm');
-    const formatSelect = document.getElementById('formatSelect');
-
-    function isProbablyTikTok(url){
-      try{ const u = new URL(url); return /tiktok.com/.test(u.hostname) || /vm.tiktok.com/.test(u.hostname);}catch(e){return false}
-    }
-
-    fetchBtn.addEventListener('click', async ()=>{
-      const url = urlInput.value.trim();
-      if(!url){alert('Masukkan URL dulu.'); return}
-      if(!isProbablyTikTok(url)){ if(!confirm('URL tidak terlihat seperti tiktok.com — lanjutkan?')) return }
-
-      status.textContent = 'Mengambil metadata...';
-      fetchBtn.disabled = true;
-      resultArea.hidden = true;
-
-      try{
-        // Panggil endpoint /api/info untuk mendapatkan metadata (lebih aman)
-        const infoRes = await fetch(baseBackend + '/api/info?url=' + encodeURIComponent(url));
-        if(!infoRes.ok) throw new Error('Gagal menerima metadata dari backend');
-        const infoJson = await infoRes.json();
-        if(!infoJson.success) throw new Error(infoJson.error || 'Backend mengembalikan kesalahan');
-
-        const data = infoJson.data;
-
-        // Prepare preview and download link. Backend kita menyediakan /api/download yang melakukan redirect.
-        const downloadParams = new URLSearchParams();
-        downloadParams.set('url', url);
-        if(noWm.checked) downloadParams.set('no_wm', 'true');
-        if(formatSelect.value === 'audio') downloadParams.set('audio', 'true');
-
-        const downloadUrl = baseBackend + '/api/download?' + downloadParams.toString();
-
-        // Populate preview (video if possible)
-        previewContainer.innerHTML = '';
-        if(formatSelect.value === 'video'){
-          const v = document.createElement('video');
-          v.controls = true; v.src = downloadUrl; v.preload = 'metadata'; v.className = '';
-          previewContainer.appendChild(v);
-        } else {
-          const p = document.createElement('div');
-          p.textContent = 'Audio ready — klik Download untuk mengunduh file audio.';
-          previewContainer.appendChild(p);
+        async function pasteClipboard() {
+            try {
+                const text = await navigator.clipboard.readText();
+                document.getElementById('urlInput').value = text;
+            } catch (err) {
+                alert('Izin paste tidak diberikan browser.');
+            }
         }
 
-        metaTitle.textContent = 'Judul: ' + (data.title || '-');
-        metaAuthor.textContent = 'Pengguna: ' + (data.author || '-');
-        metaDuration.textContent = 'Durasi: ' + (data.duration ? data.duration + 's' : '-');
+        async function fetchVideoInfo() {
+            const url = document.getElementById('urlInput').value;
+            const loading = document.getElementById('loading');
+            const resultCard = document.getElementById('resultCard');
+            const errorMsg = document.getElementById('errorMsg');
+            const processBtn = document.getElementById('processBtn');
 
-        downloadLink.href = downloadUrl;
-        downloadLink.setAttribute('download', formatSelect.value === 'video' ? 'tiktok_video.mp4' : 'tiktok_audio.mp3');
+            // Reset State
+            resultCard.classList.add('hidden');
+            errorMsg.classList.add('hidden');
 
-        resultArea.hidden = false;
-        status.textContent = 'Selesai — siap unduh.';
+            if (!url) {
+                showError("Link tidak boleh kosong!");
+                return;
+            }
 
-      }catch(err){
-        console.error(err);
-        alert('Gagal: ' + err.message);
-        status.textContent = 'Error';
-      }finally{
-        fetchBtn.disabled = false;
-      }
-    });
+            // UI Loading State
+            loading.classList.remove('hidden');
+            processBtn.disabled = true;
+            processBtn.classList.add('opacity-50');
 
-    clearBtn.addEventListener('click', ()=>{
-      urlInput.value = '';
-      resultArea.hidden = true;
-      status.textContent = 'Siap';
-    });
+            try {
+                // 1. Panggil /api/info untuk mendapatkan metadata
+                const response = await fetch(`${API_BASE}/api/info?url=${encodeURIComponent(url)}`);
+                const json = await response.json();
 
-    copyBtn.addEventListener('click', ()=>{
-      if(!downloadLink.href){alert('Belum ada link');return}
-      navigator.clipboard.writeText(downloadLink.href).then(()=>{
-        status.textContent = 'Link disalin ke clipboard.';
-      }).catch(()=>status.textContent = 'Gagal menyalin.');
-    });
+                if (!response.ok || !json.success) {
+                    throw new Error(json.error || "Gagal mengambil data video");
+                }
 
-    urlInput.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ fetchBtn.click(); e.preventDefault(); } });
-  </script>
+                const data = json.data;
+                console.log("Data diterima:", data); // Cek Console browser untuk lihat isi data
 
+                // 2. Isi data ke HTML
+                // Note: Saya menebak nama key (cover, title, nickname) karena tidak melihat 'downloader.py'
+                // Jika gambar/text tidak muncul, cek Console log dan sesuaikan key di bawah ini:
+                
+                document.getElementById('thumb').src = data.cover || data.origin_cover || "https://via.placeholder.com/150"; 
+                document.getElementById('author').innerText = data.author?.nickname || data.author || "@user";
+                document.getElementById('desc').innerText = data.title || data.desc || "Video TikTok";
+                
+                // Opsional: Statistik (Jika API menyediakan)
+                if(data.play_count) document.getElementById('stats_plays').innerHTML = `<i class="fas fa-play mr-1"></i> ${formatCompactNumber(data.play_count)}`;
+                if(data.digg_count) document.getElementById('stats_likes').innerHTML = `<i class="fas fa-heart mr-1"></i> ${formatCompactNumber(data.digg_count)}`;
+
+                // 3. Set Link Download Button
+                // Kita arahkan langsung ke backend endpoint /api/download agar backend yang handle redirect
+                const encodedUrl = encodeURIComponent(url);
+                document.getElementById('btnNoWm').href = `${API_BASE}/api/download?url=${encodedUrl}&no_wm=true`;
+                document.getElementById('btnAudio').href = `${API_BASE}/api/download?url=${encodedUrl}&audio=true`;
+
+                resultCard.classList.remove('hidden');
+
+            } catch (error) {
+                console.error(error);
+                showError(error.message);
+            } finally {
+                loading.classList.add('hidden');
+                processBtn.disabled = false;
+                processBtn.classList.remove('opacity-50');
+            }
+        }
+
+        function showError(msg) {
+            document.getElementById('errorText').innerText = msg;
+            document.getElementById('errorMsg').classList.remove('hidden');
+        }
+
+        function formatCompactNumber(number) {
+            return Intl.NumberFormat('en-US', { notation: "compact", maximumFractionDigits: 1 }).format(number);
+        }
+    </script>
 </body>
 </html>
